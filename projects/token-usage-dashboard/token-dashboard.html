@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Token Usage Dashboard - Medical Research Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* MODEL USAGE TABLE */
+        .usage-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .usage-table th,
+        .usage-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .usage-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .model-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .model-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-primary { background: #dbeafe; color: #1d4ed8; }
+        .status-active { background: #dcfce7; color: #16a34a; }
+        .status-available { background: #f3f4f6; color: #6b7280; }
+
+        .cost-high { color: #dc2626; font-weight: 600; }
+        .cost-medium { color: #ea580c; font-weight: 600; }
+        .cost-low { color: #16a34a; font-weight: 600; }
+
+        /* SUMMARY STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* RECOMMENDATIONS */
+        .recommendations {
+            grid-column: 1 / -1;
+        }
+
+        .rec-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid;
+        }
+
+        .rec-save { 
+            background: #f0fdf4; 
+            border-left-color: #16a34a; 
+        }
+
+        .rec-warning { 
+            background: #fefce8; 
+            border-left-color: #eab308; 
+        }
+
+        .rec-info { 
+            background: #eff6ff; 
+            border-left-color: #3b82f6; 
+        }
+
+        .rec-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .rec-desc {
+            color: #475569;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* LIVE USAGE MONITOR */
+        .live-monitor {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .live-monitor .card-title {
+            color: white;
+            border-bottom-color: #475569;
+        }
+
+        .token-counter {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            margin: 1rem 0;
+            color: #10b981;
+        }
+
+        .session-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .session-stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .session-stat-number {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* COST OPTIMIZATION ALERTS */
+        .alert-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-section .card-title {
+            color: #dc2626;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-icon {
+            font-size: 1.125rem;
+        }
+
+        .alert-text {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .refresh-time {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="refresh-time" id="refresh-time">Updated: --</div>
+    
+    <div class="header">
+        <h1>🔍 Token Usage Dashboard</h1>
+        <p>Real-time model usage tracking and cost optimization for Medical Research Command Center</p>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- MODEL USAGE TABLE -->
+            <div class="card">
+                <h2 class="card-title">📊 Model Usage Breakdown</h2>
+                <table class="usage-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Status</th>
+                            <th>Tokens Used</th>
+                            <th>Cost/1K Tokens</th>
+                            <th>Total Cost</th>
+                            <th>Usage %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="model-name">Claude Sonnet 4</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">anthropic/claude-sonnet-4-20250514</div>
+                            </td>
+                            <td><span class="model-status status-primary">PRIMARY</span></td>
+                            <td><strong>125,418</strong></td>
+                            <td class="cost-high">$0.48/1K</td>
+                            <td class="cost-high">$0.06015</td>
+                            <td><strong>98.5%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="model-name">MiniMax M2</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">minimax/MiniMax-M2</div>
+                            </td>
+                            <td><span class="model-status status-active">CRON JOBS</span></td>
+                            <td><strong>1,200</strong> <span style="color: #64748b;">(est.)</span></td>
+                            <td class="cost-low">$0.002/1K</td>
+                            <td class="cost-low">$0.0024</td>
+                            <td><strong>1.0%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="model-name">Claude Opus 4.5</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">anthropic/claude-opus-4-5-20250514</div>
+                            </td>
+                            <td><span class="model-status status-available">AVAILABLE</span></td>
+                            <td>500 <span style="color: #64748b;">(est.)</span></td>
+                            <td class="cost-high">$0.75/1K</td>
+                            <td class="cost-high">$0.0375</td>
+                            <td><strong>0.4%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="model-name">MiniMax Lightning</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">minimax/MiniMax-M2.1-lightning</div>
+                            </td>
+                            <td><span class="model-status status-available">AVAILABLE</span></td>
+                            <td>100 <span style="color: #64748b;">(est.)</span></td>
+                            <td class="cost-low">$0.001/1K</td>
+                            <td class="cost-low">$0.0001</td>
+                            <td><strong>0.1%</strong></td>
+                        </tr>
+                        <tr style="background: #fef2f2;">
+                            <td>
+                                <div class="model-name">Claude Haiku</div>
+                                <div style="font-size: 0.75rem; color: #dc2626;">⚠️ NOT CONFIGURED</div>
+                            </td>
+                            <td><span class="model-status" style="background: #fca5a5; color: #7f1d1d;">MISSING</span></td>
+                            <td>--</td>
+                            <td class="cost-low">$0.025/1K</td>
+                            <td>--</td>
+                            <td>--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SUMMARY STATS -->
+            <div class="card">
+                <h2 class="card-title">📈 Session Summary</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">127,218</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$0.100</div>
+                        <div class="stat-label">Total Cost</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">240x</div>
+                        <div class="stat-label">MiniMax Savings</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Models Available</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COST OPTIMIZATION ALERTS -->
+            <div class="card alert-section">
+                <h2 class="card-title">🚨 Cost Optimization Alerts</h2>
+                <div class="alert-item">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-text">
+                        <strong>Haiku Missing:</strong> Claude Haiku not configured. Could save 95% on simple tasks vs Sonnet.
+                    </div>
+                    <button class="btn" onclick="addHaiku()">Add Haiku</button>
+                </div>
+                <div class="alert-item">
+                    <div class="alert-icon">💰</div>
+                    <div class="alert-text">
+                        <strong>High Sonnet Usage:</strong> 98.5% of tokens use expensive Sonnet. Consider MiniMax for routine tasks.
+                    </div>
+                    <button class="btn" onclick="optimizeUsage()">Optimize</button>
+                </div>
+                <div class="alert-item">
+                    <div class="alert-icon">📊</div>
+                    <div class="alert-text">
+                        <strong>Usage Tracking:</strong> No cost limits configured. Consider setting daily/monthly budgets.
+                    </div>
+                    <button class="btn" onclick="setBudgets()">Set Budgets</button>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATIONS -->
+            <div class="card recommendations">
+                <h2 class="card-title">💡 Optimization Recommendations</h2>
+                
+                <div class="rec-item rec-save">
+                    <div class="rec-title">🎯 Add Claude Haiku - Potential 95% Cost Reduction</div>
+                    <div class="rec-desc">
+                        Configure Claude Haiku for simple tasks like kanban updates, basic Q&A, and routine responses. 
+                        Cost: $0.025/1K vs $0.48/1K for Sonnet. Could save $45+ per 100K tokens.
+                    </div>
+                </div>
+
+                <div class="rec-item rec-info">
+                    <div class="rec-title">🔄 Expand MiniMax Usage - Currently Only 1%</div>
+                    <div class="rec-desc">
+                        MiniMax models are 240x cheaper than Sonnet. Perfect for automation, cron jobs, bulk operations, 
+                        and first-pass analysis. Consider using for UI feedback, task management, and routine updates.
+                    </div>
+                </div>
+
+                <div class="rec-item rec-warning">
+                    <div class="rec-title">⚖️ Smart Model Routing Strategy</div>
+                    <div class="rec-desc">
+                        Create automatic routing: Haiku for simple tasks, MiniMax for automation/bulk work, 
+                        Sonnet for complex analysis, Opus only for critical research. Could reduce costs 60-80%.
+                    </div>
+                </div>
+
+                <div class="rec-item rec-info">
+                    <div class="rec-title">📊 Usage Monitoring & Budgets</div>
+                    <div class="rec-desc">
+                        Set up daily/monthly token budgets, usage alerts, and automatic model degradation when 
+                        approaching limits. Track usage by task type to optimize model selection.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIVE USAGE MONITOR -->
+        <div class="card live-monitor">
+            <h2 class="card-title">⚡ Live Session Monitor</h2>
+            <div class="token-counter" id="live-tokens">125,418 tokens</div>
+            
+            <div class="session-info">
+                <div class="session-stat">
+                    <div class="session-stat-number">$0.06015</div>
+                    <div class="session-stat-label">Current Cost</div>
+                </div>
+                <div class="session-stat">
+                    <div class="session-stat-number">119,865</div>
+                    <div class="session-stat-label">Cache Read</div>
+                </div>
+                <div class="session-stat">
+                    <div class="session-stat-number">60%</div>
+                    <div class="session-stat-label">Context Used</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update refresh time
+        function updateRefreshTime() {
+            document.getElementById('refresh-time').textContent = 
+                'Updated: ' + new Date().toLocaleTimeString();
+        }
+
+        // Simulate live token counter
+        function updateLiveCounter() {
+            const counter = document.getElementById('live-tokens');
+            let currentTokens = 125418;
+            
+            setInterval(() => {
+                // Simulate token usage growth
+                currentTokens += Math.floor(Math.random() * 50) + 10;
+                counter.textContent = currentTokens.toLocaleString() + ' tokens';
+            }, 5000);
+        }
+
+        // Action handlers
+        function addHaiku() {
+            alert('🔧 Adding Haiku to configuration...\n\nThis will:\n- Add Claude Haiku 3.5 to available models\n- Configure cost-optimized routing\n- Enable 95% cost savings on simple tasks\n\nImplementation: Update clawdbot.json config');
+        }
+
+        function optimizeUsage() {
+            alert('⚙️ Optimizing model usage patterns...\n\nWill implement:\n- Smart routing based on task complexity\n- MiniMax for automation/bulk operations\n- Haiku for simple Q&A and updates\n- Sonnet only for complex analysis');
+        }
+
+        function setBudgets() {
+            alert('📊 Setting up usage budgets...\n\nWill configure:\n- Daily token limits\n- Cost thresholds with alerts\n- Automatic model degradation\n- Usage reporting and analytics');
+        }
+
+        // Initialize
+        updateRefreshTime();
+        updateLiveCounter();
+        
+        // Refresh every 30 seconds
+        setInterval(updateRefreshTime, 30000);
+    </script>
+</body>
+</html>

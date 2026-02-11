@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪖 Soldier's Smart Kanban Board</title>
+    <style>
+        :root {
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --surface-50: #f8fafc;
+            --surface-100: #f1f5f9;
+            --surface-200: #e2e8f0;
+            --surface-900: #0f172a;
+            --text-900: #0f172a;
+            --text-600: #475569;
+            --text-400: #94a3b8;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --critical: #dc2626;
+            --high: #d97706;
+            --medium: #2563eb;
+            --low: #6b7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--surface-50);
+            color: var(--text-900);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--surface-200);
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-600);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .header-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-900);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--surface-200);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            min-width: 250px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid var(--surface-200);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-secondary {
+            background: var(--surface-100);
+            color: var(--text-600);
+            border: 1px solid var(--surface-200);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-200);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--surface-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-600);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* View Toggle */
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--surface-200);
+            background: white;
+            color: var(--text-600);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .view-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        /* Kanban Board */
+        .kanban-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .column {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--surface-200);
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        .column-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--surface-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .column-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-900);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .column-count {
+            background: var(--primary-600);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .column-content {
+            padding: 1rem;
+            min-height: 400px;
+        }
+
+        .task-card {
+            background: var(--surface-50);
+            border: 1px solid var(--surface-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            position: relative;
+        }
+
+        .task-card:hover {
+            background: white;
+            border-color: var(--primary-600);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .task-card.priority-critical {
+            border-left: 4px solid var(--critical);
+            background: linear-gradient(90deg, rgba(220, 38, 38, 0.05), var(--surface-50));
+        }
+
+        .task-card.priority-high {
+            border-left: 4px solid var(--high);
+            background: linear-gradient(90deg, rgba(217, 119, 6, 0.05), var(--surface-50));
+        }
+
+        .task-card.priority-medium {
+            border-left: 4px solid var(--medium);
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.05), var(--surface-50));
+        }
+
+        .task-card.priority-low {
+            border-left: 4px solid var(--low);
+            background: linear-gradient(90deg, rgba(107, 114, 128, 0.05), var(--surface-50));
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: var(--text-900);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-600);
+        }
+
+        .task-project {
+            background: var(--surface-100);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .task-owner {
+            font-weight: 600;
+        }
+
+        .task-owner.soldier {
+            color: var(--primary-600);
+        }
+
+        .task-owner.alex {
+            color: var(--success);
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge.critical {
+            background: var(--critical);
+            color: white;
+        }
+
+        .priority-badge.high {
+            background: var(--high);
+            color: white;
+        }
+
+        .priority-badge.medium {
+            background: var(--medium);
+            color: white;
+        }
+
+        .priority-badge.low {
+            background: var(--low);
+            color: white;
+        }
+
+        /* Collapsible sections */
+        .collapsible-group {
+            margin-bottom: 1rem;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--surface-100);
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .collapsible-header:hover {
+            background: var(--surface-200);
+        }
+
+        .collapsible-title {
+            font-weight: 600;
+            color: var(--text-900);
+        }
+
+        .collapsible-count {
+            background: var(--primary-600);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .collapsible-content {
+            display: none;
+        }
+
+        .collapsible-content.expanded {
+            display: block;
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-400);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls {
+                justify-content: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="logo">🪖</div>
+                <h1 class="header-text">Soldier's Smart Kanban</h1>
+            </div>
+            
+            <div class="controls">
+                <input type="text" class="search-box" placeholder="Search tasks..." id="searchInput">
+                
+                <div class="filter-group">
+                    <select class="filter-select" id="priorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="critical">Critical Only</option>
+                        <option value="high">Critical + High</option>
+                        <option value="medium">Medium+</option>
+                    </select>
+                    
+                    <select class="filter-select" id="ownerFilter">
+                        <option value="all">All Owners</option>
+                        <option value="Soldier">AI Tasks</option>
+                        <option value="Alex">Human Tasks</option>
+                    </select>
+                    
+                    <select class="filter-select" id="projectFilter">
+                        <option value="all">All Projects</option>
+                    </select>
+                </div>
+                
+                <div class="view-controls">
+                    <button class="view-btn active" data-view="focus">Focus View</button>
+                    <button class="view-btn" data-view="all">All Tasks</button>
+                    <button class="view-btn" data-view="groups">By Project</button>
+                </div>
+                
+                <button class="btn btn-primary" onclick="addTask()">
+                    + Add Task
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stats-group">
+            <div class="stat-item">
+                <div class="stat-value" id="totalTasks">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="criticalTasks">0</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="highTasks">0</div>
+                <div class="stat-label">High Priority</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="blockedTasks">0</div>
+                <div class="stat-label">Blocked</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="doneTasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        
+        <div class="stats-group">
+            <div class="stat-item">
+                <div class="stat-value" id="aiTasks">0</div>
+                <div class="stat-label">AI Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="humanTasks">0</div>
+                <div class="stat-label">Human Tasks</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-container">
+        <div class="kanban-board" id="kanbanBoard">
+            <!-- Columns will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Enhanced task data with intelligent organization
+        const smartTasks = [
+            // CRITICAL PRIORITY - Focus on these first
+            {
+                id: 'SOLDIER-UI-016',
+                title: 'Automated job creation from systematic plans',
+                project: 'Kanban UI Overhaul',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'critical',
+                category: 'enhancement'
+            },
+            {
+                id: 'ALEX-UI-001',
+                title: 'User testing and feedback on enhanced functionality',
+                project: 'Kanban UI Overhaul',
+                owner: 'Alex',
+                status: 'todo',
+                priority: 'critical',
+                category: 'review'
+            },
+            {
+                id: 'SOLDIER-PM-010',
+                title: 'Implement actionable step requirement for every plan/discussion',
+                project: 'Systematic Planning',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'critical',
+                category: 'automation'
+            },
+            
+            // HIGH PRIORITY
+            {
+                id: 'ALEX-BC-001',
+                title: 'DECISION NEEDED - Migration strategy vs new deployment',
+                project: 'BitClaw Protocol',
+                owner: 'Alex',
+                status: 'blocked',
+                priority: 'high',
+                category: 'decision',
+                notes: 'Supply issue needs resolution'
+            },
+            {
+                id: 'ALEX-UGC-001',
+                title: 'Define business priorities and target market specifics',
+                project: 'UGC Creator Agent',
+                owner: 'Alex',
+                status: 'todo',
+                priority: 'high',
+                category: 'strategy',
+                notes: 'AU$24K+/month opportunity validated'
+            },
+            {
+                id: 'SOLDIER-UGC-004',
+                title: 'Develop creator database structure (10K-100K followers)',
+                project: 'UGC Creator Agent',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'high',
+                category: 'development'
+            },
+            {
+                id: 'ALEX-MR-001',
+                title: 'Define research priorities for Q1 2026',
+                project: 'Medical Research',
+                owner: 'Alex',
+                status: 'todo',
+                priority: 'high',
+                category: 'planning'
+            },
+            
+            // MEDIUM PRIORITY - Grouped
+            {
+                id: 'SOLDIER-CO-001',
+                title: 'Implement actual cron jobs for cost monitoring',
+                project: 'Cost Optimization',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'medium',
+                category: 'automation'
+            },
+            {
+                id: 'SOLDIER-CO-002',
+                title: 'Set up automated disk space management',
+                project: 'Cost Optimization',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'medium',
+                category: 'automation'
+            },
+            {
+                id: 'SOLDIER-OP-001',
+                title: 'Research and analyze loot-drop.io structure',
+                project: 'Opportunity Scouting',
+                owner: 'Soldier',
+                status: 'todo',
+                priority: 'medium',
+                category: 'research'
+            },
+            
+            // COMPLETED TASKS
+            {
+                id: 'SOLDIER-PM-001',
+                title: 'Audit all existing project directories',
+                project: 'Systematic Planning',
+                owner: 'Soldier',
+                status: 'done',
+                priority: 'high',
+                category: 'planning'
+            },
+            {
+                id: 'SOLDIER-PM-009',
+                title: 'Create systematic planning methodology documentation',
+                project: 'Systematic Planning',
+                owner: 'Soldier',
+                status: 'done',
+                priority: 'critical',
+                category: 'documentation'
+            },
+            {
+                id: 'SOLDIER-UI-013',
+                title: 'Advanced filtering and search functionality',
+                project: 'Kanban UI Overhaul',
+                owner: 'Soldier',
+                status: 'done',
+                priority: 'high',
+                category: 'enhancement'
+            }
+        ];
+
+        let currentView = 'focus';
+        let filters = {
+            priority: 'high',
+            owner: 'all',
+            project: 'all',
+            search: ''
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFilters();
+            renderBoard();
+            updateStats();
+        });
+
+        function setupFilters() {
+            // Populate project filter
+            const projects = [...new Set(smartTasks.map(t => t.project))];
+            const projectFilter = document.getElementById('projectFilter');
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project;
+                projectFilter.appendChild(option);
+            });
+
+            // Setup event listeners
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                filters.search = e.target.value.toLowerCase();
+                renderBoard();
+            });
+
+            document.getElementById('priorityFilter').addEventListener('change', (e) => {
+                filters.priority = e.target.value;
+                renderBoard();
+            });
+
+            document.getElementById('ownerFilter').addEventListener('change', (e) => {
+                filters.owner = e.target.value;
+                renderBoard();
+            });
+
+            document.getElementById('projectFilter').addEventListener('change', (e) => {
+                filters.project = e.target.value;
+                renderBoard();
+            });
+
+            // View toggle
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentView = e.target.dataset.view;
+                    renderBoard();
+                });
+            });
+        }
+
+        function filterTasks() {
+            return smartTasks.filter(task => {
+                // Priority filter
+                if (filters.priority !== 'all') {
+                    const priorityOrder = ['critical', 'high', 'medium', 'low'];
+                    const taskPriority = priorityOrder.indexOf(task.priority);
+                    const maxPriority = priorityOrder.indexOf(filters.priority);
+                    if (taskPriority > maxPriority) return false;
+                }
+
+                // Owner filter
+                if (filters.owner !== 'all' && task.owner !== filters.owner) return false;
+
+                // Project filter
+                if (filters.project !== 'all' && task.project !== filters.project) return false;
+
+                // Search filter
+                if (filters.search) {
+                    const searchText = `${task.title} ${task.project} ${task.owner}`.toLowerCase();
+                    if (!searchText.includes(filters.search)) return false;
+                }
+
+                return true;
+            });
+        }
+
+        function renderBoard() {
+            const filteredTasks = filterTasks();
+            const board = document.getElementById('kanbanBoard');
+            
+            if (currentView === 'focus') {
+                renderFocusView(board, filteredTasks);
+            } else if (currentView === 'groups') {
+                renderGroupsView(board, filteredTasks);
+            } else {
+                renderAllView(board, filteredTasks);
+            }
+            
+            updateStats();
+        }
+
+        function renderFocusView(board, tasks) {
+            // Focus view: Only Critical + High priority
+            const criticalTasks = tasks.filter(t => t.priority === 'critical');
+            const highTasks = tasks.filter(t => t.priority === 'high');
+            
+            board.innerHTML = `
+                <div class="column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            🚨 Critical Focus
+                            <span class="column-count">${criticalTasks.length}</span>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        ${criticalTasks.map(task => renderTaskCard(task)).join('') || '<div class="empty-state">No critical tasks</div>'}
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            ⚡ High Priority
+                            <span class="column-count">${highTasks.length}</span>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        ${highTasks.map(task => renderTaskCard(task)).join('') || '<div class="empty-state">No high priority tasks</div>'}
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            📋 To Do (Medium+)
+                            <span class="column-count">${tasks.filter(t => t.priority !== 'critical' && t.priority !== 'high').length}</span>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        ${tasks.filter(t => t.priority !== 'critical' && t.priority !== 'high').map(task => renderTaskCard(task)).join('') || '<div class="empty-state">No medium/low tasks</div>'}
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            ✅ Completed
+                            <span class="column-count">${smartTasks.filter(t => t.status === 'done').length}</span>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        ${smartTasks.filter(t => t.status === 'done').slice(0, 5).map(task => renderTaskCard(task)).join('') || '<div class="empty-state">No completed tasks</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGroupsView(board, tasks) {
+            // Group by project
+            const groups = {};
+            tasks.forEach(task => {
+                if (!groups[task.project]) groups[task.project] = [];
+                groups[task.project].push(task);
+            });
+
+            board.innerHTML = Object.entries(groups).map(([project, projectTasks]) => `
+                <div class="column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            ${getProjectIcon(project)}
+                            ${project}
+                            <span class="column-count">${projectTasks.length}</span>
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        ${projectTasks.map(task => renderTaskCard(task)).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAllView(board, tasks) {
+            // Traditional kanban view
+            const statuses = ['todo', 'in-progress', 'blocked', 'review', 'done'];
+            board.innerHTML = statuses.map(status => {
+                const statusTasks = tasks.filter(t => t.status === status);
+                return `
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">
+                                ${getStatusIcon(status)}
+                                ${getStatusTitle(status)}
+                                <span class="column-count">${statusTasks.length}</span>
+                            </div>
+                        </div>
+                        <div class="column-content">
+                            ${statusTasks.map(task => renderTaskCard(task)).join('') || '<div class="empty-state">No tasks</div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTaskCard(task) {
+            return `
+                <div class="task-card priority-${task.priority}" onclick="viewTask('${task.id}')">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-meta">
+                        <div>
+                            <span class="task-project">${task.project}</span>
+                            <span class="task-owner ${task.owner.toLowerCase()}">${task.owner}</span>
+                        </div>
+                        <span class="priority-badge ${task.priority}">${task.priority}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getProjectIcon(project) {
+            const icons = {
+                'Kanban UI Overhaul': '🎨',
+                'BitClaw Protocol': '🪙',
+                'UGC Creator Agent': '🎯',
+                'Medical Research': '🏥',
+                'Systematic Planning': '📋',
+                'Cost Optimization': '💰',
+                'Opportunity Scouting': '🔍'
+            };
+            return icons[project] || '📁';
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'todo': '📋',
+                'in-progress': '⚡',
+                'blocked': '🚫',
+                'review': '👀',
+                'done': '✅'
+            };
+            return icons[status] || '📋';
+        }
+
+        function getStatusTitle(status) {
+            const titles = {
+                'todo': 'To Do',
+                'in-progress': 'In Progress',
+                'blocked': 'Blocked',
+                'review': 'Review',
+                'done': 'Done'
+            };
+            return titles[status] || 'To Do';
+        }
+
+        function updateStats() {
+            const filtered = filterTasks();
+            document.getElementById('totalTasks').textContent = smartTasks.length;
+            document.getElementById('criticalTasks').textContent = smartTasks.filter(t => t.priority === 'critical').length;
+            document.getElementById('highTasks').textContent = smartTasks.filter(t => t.priority === 'high').length;
+            document.getElementById('blockedTasks').textContent = smartTasks.filter(t => t.status === 'blocked').length;
+            document.getElementById('doneTasks').textContent = smartTasks.filter(t => t.status === 'done').length;
+            document.getElementById('aiTasks').textContent = smartTasks.filter(t => t.owner === 'Soldier').length;
+            document.getElementById('humanTasks').textContent = smartTasks.filter(t => t.owner === 'Alex').length;
+        }
+
+        function viewTask(taskId) {
+            const task = smartTasks.find(t => t.id === taskId);
+            if (task) {
+                alert(`Task: ${task.title}\nProject: ${task.project}\nOwner: ${task.owner}\nPriority: ${task.priority}\nStatus: ${task.status}`);
+            }
+        }
+
+        function addTask() {
+            const title = prompt('Task title:');
+            if (title) {
+                const newTask = {
+                    id: `TASK-${Date.now()}`,
+                    title,
+                    project: 'General',
+                    owner: 'Alex',
+                    status: 'todo',
+                    priority: 'medium'
+                };
+                smartTasks.push(newTask);
+                renderBoard();
+                updateStats();
+            }
+        }
+    </script>
+</body>
+</html>

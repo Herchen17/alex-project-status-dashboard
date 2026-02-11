@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html><head><title>🪖 Soldier's Kanban</title>
+<style>
+body{font-family:Arial,sans-serif;background:#1a1a1a;color:#fff;padding:20px;margin:0}
+.board{display:flex;gap:15px;overflow-x:auto}.column{background:#333;padding:15px;border-radius:8px;min-width:250px;max-width:300px}
+.column h3{color:#00ff88;margin:0 0 15px;font-size:1.2rem}.card{background:#555;padding:12px;margin:8px 0;border-radius:5px;cursor:move;border-left:3px solid #00ff88}
+.card:hover{background:#666;transform:translateY(-1px);transition:all 0.2s}.card small{color:#aaa;font-size:0.8rem}
+input{width:calc(100% - 16px);padding:8px;background:#444;border:1px solid #666;color:#fff;border-radius:4px;margin-top:10px}
+.header{text-align:center;margin-bottom:20px}.header h1{color:#00ff88;margin:0}
+@media(max-width:768px){.board{flex-direction:column}.column{min-width:auto;max-width:none}}
+</style></head><body>
+<div class="header"><h1>🪖 Project Command Center</h1><p>Drag tasks between columns to track progress</p></div>
+<div class="board">
+<div class="column"><h3>📋 To Do</h3><div id="todo">
+<div class="card" draggable="true">🪖 Deploy BitClaw Protocol<br><small>Smart contract to Base mainnet</small></div>
+<div class="card" draggable="true">🎯 UGC Creator Agent Research<br><small>Size the $24k/month opportunity</small></div>
+<div class="card" draggable="true">📚 Medical Research Pipeline<br><small>Organize current orthopaedics work</small></div>
+</div><input type="text" placeholder="Add new task..." onkeypress="addTask('todo',event,this)"></div>
+
+<div class="column"><h3>⚡ In Progress</h3><div id="progress">
+<div class="card" draggable="true">🔧 Skills Optimization<br><small>QMD + Find-Skills + Prompt Guard installed</small></div>
+<div class="card" draggable="true">🌐 Kanban Board Hosting<br><small>Finding free hosting solution</small></div>
+</div><input type="text" placeholder="Add new task..." onkeypress="addTask('progress',event,this)"></div>
+
+<div class="column"><h3>✅ Done</h3><div id="done">
+<div class="card" draggable="true">📋 Kanban Board Creation<br><small>Functional project tracking system</small></div>
+<div class="card" draggable="true">🛡️ Security Hardening<br><small>Advanced prompt injection defense</small></div>
+</div><input type="text" placeholder="Add new task..." onkeypress="addTask('done',event,this)"></div>
+</div>
+
+<script>
+function addTask(col,event,input){
+if(event.key!=='Enter'||!input.value.trim())return;
+const div=document.createElement('div');
+div.className='card';div.draggable=true;
+div.innerHTML=input.value+'<br><small>Added: '+new Date().toLocaleString()+'</small>';
+document.getElementById(col).appendChild(div);input.value='';
+setupDragDrop();
+}
+function setupDragDrop(){
+document.querySelectorAll('.card').forEach(card=>{
+card.addEventListener('dragstart',e=>e.dataTransfer.setData('text/html',e.target.outerHTML));
+});
+document.querySelectorAll('.column div[id]').forEach(zone=>{
+zone.addEventListener('dragover',e=>e.preventDefault());
+zone.addEventListener('drop',e=>{
+e.preventDefault();
+const html=e.dataTransfer.getData('text/html');
+const temp=document.createElement('div');temp.innerHTML=html;
+const newCard=temp.firstChild;newCard.draggable=true;
+zone.appendChild(newCard);setupDragDrop();
+});});
+}
+setupDragDrop();
+</script></body></html>

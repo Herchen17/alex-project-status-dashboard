@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+        }
+        .status.error {
+            border-left-color: #e74c3c;
+            background: #ffebee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🖥️</div>
+        <h1>System Monitor</h1>
+        <p>Real-time monitoring for disk usage, LLM costs, and system health</p>
+        
+        <div class="status" id="status">
+            <strong id="status-text">Checking dashboard status...</strong>
+        </div>
+        
+        <a href="http://localhost:8080/" class="btn" target="_blank" id="dashboard-link">
+            📊 Open Dashboard
+        </a>
+        
+        <a href="http://localhost:8080/api/system-status" class="btn btn-secondary" target="_blank">
+            🔧 View API Data
+        </a>
+        
+        <div style="margin-top: 30px; font-size: 0.9em; color: #95a5a6;">
+            <p><strong>Commands:</strong> dashboard-status | dashboard-start | dashboard-logs</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check if dashboard is running
+        async function checkDashboard() {
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            const dashboardLink = document.getElementById('dashboard-link');
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/system-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusText.innerHTML = `✅ Dashboard active - Disk: ${data.disk.percentage}% | Sessions: ${data.llm.sessions}`;
+                    statusDiv.className = 'status';
+                } else {
+                    throw new Error('Dashboard not responding');
+                }
+            } catch (error) {
+                statusText.innerHTML = `❌ Dashboard offline - Run: <code>dashboard-start</code>`;
+                statusDiv.className = 'status error';
+                dashboardLink.style.opacity = '0.5';
+                dashboardLink.onclick = (e) => {
+                    e.preventDefault();
+                    alert('Dashboard server is not running. Use: dashboard-start');
+                };
+            }
+        }
+        
+        // Check status on load
+        checkDashboard();
+        
+        // Recheck every 10 seconds
+        setInterval(checkDashboard, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "lastChecks": {
+    "email": 1770352864,
+    "calendar": 1770352864,
+    "weather": null,
+    "kanban_review": 1704592000
+  },
+  "lastKanbanReview": {
+    "time": 1704592000,
+    "summary": "Kanban review complete - 6 priority tasks identified, no urgent blocks, focus on systematic planning core completion"
+  },
+  "notes": "2025-01-28: Email and calendar tools not configured - gmail-cli, gcalcli, or similar needed for heartbeat monitoring"
+}

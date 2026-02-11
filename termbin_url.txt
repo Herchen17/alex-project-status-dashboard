@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>termbin.com - not found (404)</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Termbin.com is a command line pastebin - easy way to share your terminal output." />
+  <link rel="canonical" href="https://termbin.com/">
+  <link rel="stylesheet" href="/src/css/styles.min.css">
+</head>
+
+<body>
+  <main>
+    <header class="home">
+      <h1>termbin.com</h1>
+    </header>
+    <section class="section text">
+      <h2>404</h2>
+      <div class="section-content">
+        <section class="subsection">
+          <h3>not found</h3>
+          <div class="subsection-content">
+            <p><a href="https://termbin.com">return to the main page</a></p>
+          </div>
+        </section>
+    </div>
+</section>
+</main>
+</body>
+
+</html>

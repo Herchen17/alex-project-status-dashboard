@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head><title>🪖 Project Tracker</title>
+<style>
+body{font-family:Arial;background:#1a1a1a;color:#fff;padding:20px}
+.board{display:flex;gap:20px}.column{background:#333;padding:15px;border-radius:8px;min-width:250px}
+.column h3{color:#00ff88;margin:0 0 15px 0}.card{background:#555;padding:10px;margin:10px 0;border-radius:5px;cursor:move}
+.card:hover{background:#666}input,textarea{width:100%;padding:8px;background:#444;border:1px solid #666;color:#fff;border-radius:4px;margin:5px 0}
+button{background:#00ff88;color:#000;border:none;padding:10px 15px;border-radius:5px;cursor:pointer}
+</style></head><body>
+<h1>🪖 Project Command Center</h1>
+<div class="board">
+<div class="column"><h3>📋 To Do</h3><div id="todo">
+<div class="card">🪖 Deploy BitClaw Protocol<br><small>Complete smart contract deployment</small></div>
+<div class="card">🎯 UGC Creator Agent<br><small>Build automated creator outreach system</small></div>
+</div><input type="text" placeholder="Add task..." onkeypress="if(event.key==='Enter')addTask('todo',this)"></div>
+
+<div class="column"><h3>⚡ In Progress</h3><div id="progress">
+<div class="card">🔧 Skills Optimization<br><small>QMD + Find-Skills + Prompt Guard</small></div>
+</div><input type="text" placeholder="Add task..." onkeypress="if(event.key==='Enter')addTask('progress',this)"></div>
+
+<div class="column"><h3>✅ Done</h3><div id="done">
+<div class="card">📋 Kanban Board Creation<br><small>Project tracking system built</small></div>
+</div><input type="text" placeholder="Add task..." onkeypress="if(event.key==='Enter')addTask('done',this)"></div>
+</div>
+
+<script>
+function addTask(col,input){
+if(!input.value.trim()) return;
+const div=document.createElement('div');
+div.className='card';
+div.innerHTML=input.value+'<br><small>Added: '+new Date().toLocaleString()+'</small>';
+document.getElementById(col).appendChild(div);
+input.value='';
+}
+// Make cards draggable
+document.addEventListener('dragstart',e=>{if(e.target.className==='card')e.dataTransfer.setData('text',e.target.outerHTML)});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{
+if(e.target.tagName==='DIV'&&e.target.id){
+const html=e.dataTransfer.getData('text');
+const temp=document.createElement('div');temp.innerHTML=html;
+e.target.appendChild(temp.firstChild);
+}});
+document.querySelectorAll('.card').forEach(c=>c.draggable=true);
+</script></body></html>

@@ -24,4 +24,10 @@ __exportStar(require("./types/MedicalClinic.js"), exports);
 __exportStar(require("./validation/clinicValidator.js"), exports);
 // Export database utilities
 __exportStar(require("./database/migrations.js"), exports);
+// Export database components (new in MED-002)
+__exportStar(require("./database/connection.js"), exports);
+__exportStar(require("./database/seeder.js"), exports);
+__exportStar(require("./database/clinicRepository.js"), exports);
+// Export middleware (new in MED-002)
+__exportStar(require("./middleware/validationMiddleware.js"), exports);
 //# sourceMappingURL=index.js.map

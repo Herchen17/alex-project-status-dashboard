@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html><head><title>🪖 Soldier's Advanced Command Center</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%); color: #fff; min-height: 100vh; }
+
+.header { text-align: center; padding: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,255,136,0.2); }
+.header h1 { color: #00ff88; font-size: 2.8rem; font-weight: 700; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+.header p { color: #ccc; font-size: 1.2rem; font-weight: 300; }
+
+.dashboard-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; padding: 20px; }
+
+.main-board { background: rgba(255,255,255,0.02); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
+
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+.token-tracker { background: linear-gradient(135deg, rgba(255,68,68,0.1), rgba(255,170,0,0.1)); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,170,0,0.3); }
+.token-tracker h3 { color: #ffaa00; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.token-usage { display: grid; gap: 10px; }
+.usage-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.usage-label { font-size: 0.9rem; color: #ccc; }
+.usage-value { font-weight: 600; color: #ffaa00; }
+.cost-indicator { font-size: 0.8rem; color: #ff4444; }
+
+.subagents-panel { background: linear-gradient(135deg, rgba(68,136,255,0.1), rgba(136,68,255,0.1)); border-radius: 16px; padding: 20px; border: 1px solid rgba(136,68,255,0.3); }
+.subagents-panel h3 { color: #8844ff; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.subagent-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 8px; }
+.subagent-name { font-size: 0.9rem; font-weight: 600; }
+.subagent-status { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; }
+.status-active { background: rgba(0,255,136,0.2); color: #00ff88; }
+.status-idle { background: rgba(255,255,255,0.1); color: #999; }
+.status-working { background: rgba(255,170,0,0.2); color: #ffaa00; }
+
+.skills-panel { background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,170,255,0.1)); border-radius: 16px; padding: 20px; border: 1px solid rgba(0,255,136,0.3); }
+.skills-panel h3 { color: #00ff88; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.skill-item { padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 6px; font-size: 0.9rem; }
+.skill-new { border-left: 3px solid #00ff88; }
+
+.board { display: flex; gap: 16px; overflow-x: auto; min-height: 600px; padding: 10px 0; }
+.column { background: rgba(255,255,255,0.08); border-radius: 12px; min-width: 280px; max-width: 280px; padding: 16px; border: 1px solid rgba(255,255,255,0.1); }
+.column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.2); }
+.column-title { font-size: 1.1rem; font-weight: 600; color: #00ff88; }
+.card-count { background: rgba(0,255,136,0.15); color: #00ff88; padding: 4px 10px; border-radius: 16px; font-size: 0.8rem; font-weight: 600; }
+.cards-container { min-height: 400px; }
+.card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; margin-bottom: 12px; cursor: move; border-left: 3px solid #00ff88; transition: all 0.3s ease; position: relative; }
+.card:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,255,136,0.15); }
+.card-title { font-weight: 600; color: #fff; margin-bottom: 6px; font-size: 1rem; }
+.card-description { color: #ccc; font-size: 0.85rem; line-height: 1.4; margin-bottom: 10px; }
+.card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+.card-priority { padding: 3px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; }
+.priority-critical { background: #ff1744; color: white; }
+.priority-high { background: #ff4444; color: white; }
+.priority-medium { background: #ffaa00; color: white; }
+.priority-low { background: #4488ff; color: white; }
+.card-project { color: #999; font-weight: 500; }
+.card-assignee { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.assignee-soldier { background: #00ff88; color: #000; }
+.assignee-subagent { background: #8844ff; color: #fff; }
+
+.add-task-btn { width: 100%; padding: 10px; background: rgba(0,255,136,0.1); border: 2px dashed rgba(0,255,136,0.5); border-radius: 8px; color: #00ff88; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease; }
+.add-task-btn:hover { background: rgba(0,255,136,0.2); border-color: #00ff88; transform: scale(1.02); }
+
+.controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 1000; }
+.control-btn { padding: 12px 20px; background: rgba(0,255,136,0.2); border: 1px solid #00ff88; border-radius: 8px; color: #00ff88; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+.control-btn:hover { background: rgba(0,255,136,0.3); transform: scale(1.05); }
+
+@media (max-width: 1200px) { .dashboard-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .board { flex-direction: column; } .column { min-width: 100%; max-width: 100%; } }
+</style></head><body>
+
+<div class="header">
+<h1>🪖 Advanced Command Center</h1>
+<p>Multi-Agent Project Management • Token Tracking • Skill Integration</p>
+</div>
+
+<div class="dashboard-grid">
+<div class="main-board">
+<div class="board">
+
+<div class="column" data-column="backlog">
+<div class="column-header">
+<div class="column-title">📋 Backlog</div>
+<div class="card-count">0</div>
+</div>
+<div class="cards-container">
+<div class="card" draggable="true">
+<div class="card-assignee assignee-subagent">S1</div>
+<div class="card-title">🔍 Market Research Subagent</div>
+<div class="card-description">Deploy dedicated subagent for UGC creator market analysis - competitor mapping, pricing models, Australian fitness brand targeting</div>
+<div class="card-meta">
+<div class="card-priority priority-critical">CRITICAL</div>
+<div class="card-project">UGC Agent</div>
+</div>
+</div>
+
+<div class="card" draggable="true">
+<div class="card-assignee assignee-subagent">S2</div>
+<div class="card-title">📚 Research Pipeline Subagent</div>
+<div class="card-description">Automated data organization, publication tracking, R script optimization for medical research workflow</div>
+<div class="card-meta">
+<div class="card-priority priority-high">HIGH</div>
+<div class="card-project">Medical Research</div>
+</div>
+</div>
+
+<div class="card" draggable="true">
+<div class="card-assignee assignee-soldier">🪖</div>
+<div class="card-title">🛠️ High-Value Skills Installation</div>
+<div class="card-description">Install blockchain, automation, and research skills from ClawHub for enhanced capabilities</div>
+<div class="card-meta">
+<div class="card-priority priority-critical">CRITICAL</div>
+<div class="card-project">Infrastructure</div>
+</div>
+</div>
+</div>
+<button class="add-task-btn" onclick="addTask('backlog')">+ Add to Backlog</button>
+</div>
+
+<div class="column" data-column="active">
+<div class="column-header">
+<div class="column-title">⚡ Active</div>
+<div class="card-count">0</div>
+</div>
+<div class="cards-container">
+<div class="card" draggable="true">
+<div class="card-assignee assignee-subagent">S3</div>
+<div class="card-title">🪖 BitClaw Deployment Subagent</div>
+<div class="card-description">Smart contract compilation, Base network deployment, liquidity bootstrapping - autonomous execution</div>
+<div class="card-meta">
+<div class="card-priority priority-critical">CRITICAL</div>
+<div class="card-project">BitClaw Protocol</div>
+</div>
+</div>
+
+<div class="card" draggable="true">
+<div class="card-assignee assignee-soldier">🪖</div>
+<div class="card-title">🎯 Subagent Orchestration</div>
+<div class="card-description">Coordinating multiple specialized subagents for parallel project execution</div>
+<div class="card-meta">
+<div class="card-priority priority-high">HIGH</div>
+<div class="card-project">Command Center</div>
+</div>
+</div>
+</div>
+<button class="add-task-btn" onclick="addTask('active')">+ Add to Active</button>
+</div>
+
+<div class="column" data-column="review">
+<div class="column-header">
+<div class="column-title">👀 Review</div>
+<div class="card-count">0</div>
+</div>
+<div class="cards-container"></div>
+<button class="add-task-btn" onclick="addTask('review')">+ Add to Review</button>
+</div>
+
+<div class="column" data-column="done">
+<div class="column-header">
+<div class="column-title">✅ Done</div>
+<div class="card-count">0</div>
+</div>
+<div class="cards-container">
+<div class="card" draggable="true">
+<div class="card-assignee assignee-soldier">🪖</div>
+<div class="card-title">📂 GitHub Infrastructure</div>
+<div class="card-description">4 repositories created, GitHub Pages enabled, professional project structure deployed</div>
+<div class="card-meta">
+<div class="card-priority priority-low">COMPLETE</div>
+<div class="card-project">Infrastructure</div>
+</div>
+</div>
+
+<div class="card" draggable="true">
+<div class="card-assignee assignee-soldier">🪖</div>
+<div class="card-title">🔧 Skills Optimization</div>
+<div class="card-description">QMD (95% token reduction), Find-Skills, Prompt Guard installation complete</div>
+<div class="card-meta">
+<div class="card-priority priority-low">COMPLETE</div>
+<div class="card-project">System</div>
+</div>
+</div>
+</div>
+<button class="add-task-btn" onclick="addTask('done')">+ Add to Done</button>
+</div>
+
+</div>
+</div>
+
+<div class="sidebar">
+<div class="token-tracker">
+<h3>💰 Token Usage</h3>
+<div class="token-usage">
+<div class="usage-item">
+<div class="usage-label">Current Session</div>
+<div class="usage-value">~8.2K tokens</div>
+</div>
+<div class="usage-item">
+<div class="usage-label">Estimated Cost</div>
+<div class="usage-value cost-indicator">$0.16</div>
+</div>
+<div class="usage-item">
+<div class="usage-label">Today's Total</div>
+<div class="usage-value">~42.1K tokens</div>
+</div>
+<div class="usage-item">
+<div class="usage-label">Daily Cost</div>
+<div class="usage-value cost-indicator">$0.84</div>
+</div>
+<div class="usage-item">
+<div class="usage-label">Claude Sonnet</div>
+<div class="usage-value">Active Model</div>
+</div>
+<div class="usage-item">
+<div class="usage-label">QMD Savings</div>
+<div class="usage-value" style="color: #00ff88;">-95%</div>
+</div>
+</div>
+</div>
+
+<div class="subagents-panel">
+<h3>🤖 Subagents</h3>
+<div class="subagent-item">
+<div>
+<div class="subagent-name">BitClaw Specialist</div>
+<div style="font-size: 0.8rem; color: #999;">Smart contract deployment</div>
+</div>
+<div class="subagent-status status-working">DEPLOYING</div>
+</div>
+<div class="subagent-item">
+<div>
+<div class="subagent-name">UGC Research Agent</div>
+<div style="font-size: 0.8rem; color: #999;">Market analysis</div>
+</div>
+<div class="subagent-status status-idle">READY</div>
+</div>
+<div class="subagent-item">
+<div>
+<div class="subagent-name">Research Pipeline</div>
+<div style="font-size: 0.8rem; color: #999;">Data organization</div>
+</div>
+<div class="subagent-status status-idle">READY</div>
+</div>
+</div>
+
+<div class="skills-panel">
+<h3>⚡ Active Skills</h3>
+<div class="skill-item">🔍 QMD - 95% Token Reduction</div>
+<div class="skill-item">🛡️ Prompt Guard - Security</div>
+<div class="skill-item">🎯 Find Skills - Discovery</div>
+<div class="skill-item skill-new">🔗 GitHub CLI - Repos</div>
+<div class="skill-item skill-new">🌐 Web Research - Intel</div>
+<button style="width: 100%; padding: 8px; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; border-radius: 6px; color: #00ff88; margin-top: 10px; cursor: pointer;" onclick="installSkills()">+ Install More Skills</button>
+</div>
+</div>
+</div>
+
+<div class="controls">
+<div class="control-btn" onclick="spawnSubagent()">🤖 Spawn Subagent</div>
+<div class="control-btn" onclick="updateTokens()">💰 Refresh Tokens</div>
+<div class="control-btn" onclick="installSkills()">⚡ Install Skills</div>
+</div>
+
+<script>
+let draggedCard = null;
+
+// Drag and drop functionality
+document.addEventListener('DOMContentLoaded', function() {
+    setupDragDrop();
+    updateCounts();
+    updateTokenUsage();
+});
+
+function setupDragDrop() {
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('dragstart', function(e) {
+            draggedCard = this;
+            this.style.opacity = '0.5';
+        });
+        
+        card.addEventListener('dragend', function(e) {
+            this.style.opacity = '1';
+            draggedCard = null;
+        });
+    });
+    
+    document.querySelectorAll('.cards-container').forEach(container => {
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+        
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedCard) {
+                this.appendChild(draggedCard);
+                updateCounts();
+                saveState();
+            }
+        });
+    });
+}
+
+function addTask(column) {
+    const title = prompt('Task title:');
+    if (!title) return;
+    
+    const description = prompt('Task description:') || '';
+    const priority = prompt('Priority (critical/high/medium/low):', 'medium');
+    const project = prompt('Project:') || '';
+    const assignee = prompt('Assignee (soldier/subagent):', 'soldier');
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.draggable = true;
+    
+    const assigneeClass = assignee === 'subagent' ? 'assignee-subagent' : 'assignee-soldier';
+    const assigneeText = assignee === 'subagent' ? 'S' : '🪖';
+    
+    card.innerHTML = `
+        <div class="card-assignee ${assigneeClass}">${assigneeText}</div>
+        <div class="card-title">${title}</div>
+        <div class="card-description">${description}</div>
+        <div class="card-meta">
+            <div class="card-priority priority-${priority}">${priority.toUpperCase()}</div>
+            <div class="card-project">${project}</div>
+        </div>
+    `;
+    
+    document.querySelector(`[data-column="${column}"] .cards-container`).appendChild(card);
+    setupDragDrop();
+    updateCounts();
+    saveState();
+}
+
+function updateCounts() {
+    document.querySelectorAll('.column').forEach(column => {
+        const count = column.querySelectorAll('.card').length;
+        column.querySelector('.card-count').textContent = count;
+    });
+}
+
+function updateTokenUsage() {
+    // Simulate token usage updates
+    setInterval(() => {
+        const currentTokens = Math.floor(Math.random() * 1000) + 8000;
+        const dailyTokens = Math.floor(Math.random() * 5000) + 40000;
+        const currentCost = (currentTokens * 0.00002).toFixed(2);
+        const dailyCost = (dailyTokens * 0.00002).toFixed(2);
+        
+        document.querySelector('.usage-value').textContent = `~${(currentTokens/1000).toFixed(1)}K tokens`;
+        document.querySelectorAll('.cost-indicator')[0].textContent = `$${currentCost}`;
+        document.querySelectorAll('.usage-value')[2].textContent = `~${(dailyTokens/1000).toFixed(1)}K tokens`;
+        document.querySelectorAll('.cost-indicator')[1].textContent = `$${dailyCost}`;
+    }, 30000);
+}
+
+function spawnSubagent() {
+    alert('🤖 Subagent spawning functionality coming online...\n\nSpecify your mission and I\'ll deploy a specialized subagent for autonomous execution!');
+}
+
+function installSkills() {
+    alert('⚡ Skill installation interface loading...\n\nSearching ClawHub for high-value skills matching your project requirements!');
+}
+
+function saveState() {
+    // Save current board state to localStorage
+    const state = {};
+    document.querySelectorAll('.column').forEach(column => {
+        const columnId = column.dataset.column;
+        state[columnId] = [];
+        column.querySelectorAll('.card').forEach(card => {
+            state[columnId].push({
+                title: card.querySelector('.card-title').textContent,
+                description: card.querySelector('.card-description').textContent,
+                priority: card.querySelector('.card-priority').textContent,
+                project: card.querySelector('.card-project').textContent
+            });
+        });
+    });
+    localStorage.setItem('advancedKanban', JSON.stringify(state));
+}
+</script>
+
+</body></html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪖 Soldier Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e4e4e7;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #2d2d30;
+            border-right: 1px solid #404040;
+        }
+        
+        .sidebar h3 {
+            padding: 1rem;
+            background: #404040;
+            color: #ccc;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-item {
+            padding: 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #404040;
+            transition: background 0.2s;
+        }
+        
+        .nav-item:hover {
+            background: #404040;
+        }
+        
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .file-content {
+            background: #2d2d30;
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid #404040;
+        }
+        
+        .file-content h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        
+        .file-content pre {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #404040;
+            white-space: pre-wrap;
+        }
+        
+        .metrics {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .metric {
+            background: #404040;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🪖 Soldier Admin Panel</h1>
+        <div class="status">
+            <div class="status-indicator"></div>
+            <span>Connected</span>
+            <span>Clawdbot v2026.1.24</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h3>Configuration</h3>
+            <div class="nav-item active" onclick="loadFile('SOUL.md')">
+                Soul
+            </div>
+            <div class="nav-item" onclick="loadFile('USER.md')">
+                User
+            </div>
+            <div class="nav-item" onclick="loadFile('IDENTITY.md')">
+                Identity
+            </div>
+            <div class="nav-item" onclick="loadFile('TOOLS.md')">
+                Tools
+            </div>
+            <div class="nav-item" onclick="loadFile('HEARTBEAT.md')">
+                Heartbeat
+            </div>
+            
+            <h3>System</h3>
+            <div class="nav-item" onclick="loadFile('AGENTS.md')">
+                Agents
+            </div>
+            <div class="nav-item" onclick="showMetrics()">
+                Metrics
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="file-content" id="fileContent">
+                <h2>Soul Configuration</h2>
+                <pre>Loading...</pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadFile(filename) {
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            try {
+                const response = await fetch(`../${filename}`);
+                const content = await response.text();
+                
+                document.getElementById('fileContent').innerHTML = `
+                    <h2>${filename.replace('.md', '')} Configuration</h2>
+                    <pre>${content}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('fileContent').innerHTML = `
+                    <h2>Error</h2>
+                    <pre>Could not load ${filename}: ${error.message}</pre>
+                `;
+            }
+        }
+        
+        function showMetrics() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('fileContent').innerHTML = `
+                <h2>System Metrics</h2>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value">${document.querySelectorAll('.nav-item').length - 1}</div>
+                        <div class="metric-label">Configuration Files</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">2</div>
+                        <div class="metric-label">Active Models</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">∞</div>
+                        <div class="metric-label">Capabilities</div>
+                    </div>
+                </div>
+                <pre style="margin-top: 2rem;">
+System Status: Operational
+Model: MiniMax-M2 (cost-optimized)
+Last Update: ${new Date().toLocaleString()}
+Workspace: /home/ubuntu/clawd
+Memory Files: 8 recent
+Automation: Active
+                </pre>
+            `;
+        }
+        
+        // Load default file
+        loadFile('SOUL.md');
+    </script>
+</body>
+</html>
