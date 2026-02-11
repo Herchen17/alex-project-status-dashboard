@@ -1,0 +1,19 @@
+{
+  "id": "token-usage-dashboard",
+  "title": "🔍 Token Usage Dashboard",
+  "description": "Medical Research Command Center for tracking AI token usage, API costs, and optimizing model selection for research workflows.",
+  "completion": 85,
+  "lastUpdated": "2026-02-11T07:42:00.000Z",
+  "status": "active",
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "API Monitoring",
+    "Data Visualization",
+    "Cost Optimization"
+  ],
+  "startDate": "2026-01-15",
+  "repository": "https://github.com/alexherchen/token-usage-dashboard",
+  "demo_url": "https://alexherchen.dev/token-dashboard"
+}
