@@ -1,0 +1,19 @@
+{
+  "id": "kanban-dashboard",
+  "title": "🚀 Enhanced Kanban Dashboard",
+  "description": "Advanced project management dashboard with token usage tracking, subagent management, and skills integration for multi-agent coordination.",
+  "completion": 95,
+  "lastUpdated": "2026-02-11T07:42:00.000Z",
+  "status": "complete",
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "API Integration",
+    "Multi-Agent Systems",
+    "ClawHub Skills"
+  ],
+  "startDate": "2025-11-20",
+  "repository": "https://github.com/herchen17/kanban-dashboard",
+  "demo_url": "https://herchen17.github.io/kanban-dashboard"
+}
