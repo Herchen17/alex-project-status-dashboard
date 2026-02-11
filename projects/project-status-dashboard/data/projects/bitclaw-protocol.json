@@ -1,0 +1,19 @@
+{
+  "id": "bitclaw-protocol",
+  "title": "🪖 BitClaw Protocol",
+  "description": "The Bitcoin of AI Agent Platforms - 21M supply with halving mechanics. ERC-20 token with agent staking system on Base L2.",
+  "completion": 75,
+  "lastUpdated": "2026-02-11T07:42:00.000Z",
+  "status": "active",
+  "technologies": [
+    "Solidity",
+    "Base",
+    "ERC-20",
+    "Smart Contracts",
+    "Hardhat",
+    "JavaScript"
+  ],
+  "startDate": "2025-12-15",
+  "repository": "https://github.com/alexherchen/bitclaw-protocol",
+  "documentation": "https://docs.bitclaw.dev"
+}
