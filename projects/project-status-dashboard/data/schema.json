@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://alexherchen.dev/schemas/project-metadata.json",
+  "title": "Project Metadata Schema",
+  "description": "Schema for standardizing project information storage and access",
+  "type": "object",
+  "required": [
+    "id",
+    "title", 
+    "description",
+    "completion",
+    "lastUpdated",
+    "status",
+    "technologies",
+    "startDate"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 50,
+      "description": "Unique identifier for the project (lowercase, alphanumeric, hyphens allowed)"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Human-readable project title"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Project description and overview"
+    },
+    "completion": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Project completion percentage (0-100)"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 datetime of last project update"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planning", "active", "paused", "complete", "archived"],
+      "description": "Current project status"
+    },
+    "technologies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Array of technologies used in the project"
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Project start date in ISO 8601 date format"
+    },
+    "repository": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the project repository"
+    },
+    "documentation": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to project documentation"
+    },
+    "demo_url": {
+      "type": "string", 
+      "format": "uri",
+      "description": "URL to live demo or deployed application"
+    }
+  },
+  "additionalProperties": false
+}
