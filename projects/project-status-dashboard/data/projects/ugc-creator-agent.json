@@ -1,0 +1,19 @@
+{
+  "id": "ugc-creator-agent",
+  "title": "🎯 UGC Creator Agent",
+  "description": "Automated creator outreach and campaign management system targeting Australian health/fitness brands with $24k/month revenue potential.",
+  "completion": 30,
+  "lastUpdated": "2026-02-11T07:42:00.000Z",
+  "status": "planning",
+  "technologies": [
+    "Python",
+    "API Integration",
+    "Web Scraping",
+    "Machine Learning",
+    "Automation",
+    "Campaign Management"
+  ],
+  "startDate": "2026-01-08",
+  "repository": "https://github.com/alexherchen/ugc-creator-agent",
+  "documentation": "https://alexherchen.dev/ugc-strategy"
+}
